@@ -8,7 +8,7 @@ Atmos CLI is a powerful and intuitive command-line interface for fetching weathe
 *   **Flexible Location Input:** Specify locations using city names (e.g., "London"), city and state ("New York, NY"), city and country ("Paris, France"), or direct latitude/longitude coordinates.
 *   **Default Location:** The application can detect and use a default location. If no location is specified and no default is set, it will prompt you to set one on the first run.
 *   **Default to Current Weather:** If no specific data type (--current, --hourly, --daily) is requested, the application will automatically fetch and display current weather.
-*   **Historical Data:** Retrieve past weather data for specified periods.
+*   **Historical Data:** Retrieve past weather data for specified periods using date ranges or past days count.
 *   **Enhanced Interactive Mode:** Engage in a continuous input loop, allowing you to run any `atmos` command directly within the interactive prompt, now with robust parsing for commands containing spaces or quotes, and command history (up/down arrow recall).
 *   **Human-Readable Weather Codes:** Weather codes from the Open-Meteo API are now translated into clear, descriptive text for better understanding.
 *   **Input Validation:** Latitude and longitude inputs are now validated to ensure they fall within valid geographical ranges.
@@ -17,6 +17,7 @@ Atmos CLI is a powerful and intuitive command-line interface for fetching weathe
 *   **Favorite Locations:** Save and manage your frequently used locations for quick access.
 *   **Enhanced Configuration Feedback:** Clearer messages confirm when preferences like units and default locations are saved.
 *   **About Command:** A new `atmos about` command provides quick information about the CLI.
+*   **Full API Parameter Support:** All relevant parameters from the Open-Meteo Forecast and Archive APIs are exposed as command-line options.
 *   **Rich CLI Experience:** Enjoy beautifully formatted output with `rich` tables, panels, and colors, enhancing readability and user experience.
 *   **Modular Design:** Well-structured codebase for easy maintenance and extension.
 
@@ -26,10 +27,9 @@ To install and set up Atmos CLI, follow these steps:
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/your-username/atmos-cli.git
+    git clone https://github.com/hunterhines34/atmos-cli.git
     cd atmos-cli
     ```
-    *(Note: Replace `https://github.com/your-username/atmos-cli.git` with the actual repository URL if it's hosted on GitHub or similar.)*
 
 2.  **Create and activate a virtual environment:**
     It's highly recommended to use a virtual environment to manage dependencies.
@@ -88,12 +88,19 @@ If it's your first run and no default location is set, the application will prom
 *   `--temperature-unit <unit>`: Override the default temperature unit for this forecast (celsius or fahrenheit).
 *   `--wind-speed-unit <unit>`: Override the default wind speed unit for this forecast (kmh, ms, mph, or kn).
 *   `--precipitation-unit <unit>`: Override the default precipitation unit for this forecast (mm or inch).
-*   `--timezone <timezone>`: Specify the timezone for the forecast (e.g., `America/New_York`). Defaults to America/New_York.
-*   `--forecast-days <int>`: Number of days to forecast (1-16). Defaults to 7 days.
-*   `--past-days <int>`: Number of past days to include for historical data (0-92). Defaults to 0.
-*   `--archive`: Fetch data from the historical archive API instead of the forecast API. Requires specifying `--past-days`.
+*   `--timezone <timezone>`: Specify the timezone for the forecast (e.g., `America/New_York`). If not specified, the timezone is selected automatically for the given latitude and longitude.
+*   `--forecast-days <int>`: Number of days to forecast (1-16). Defaults to 7 days. Cannot be used with `--start-date`/`--end-date`.
+*   `--past-days <int>`: Number of past days to include for historical data (0-92). Defaults to 0. Cannot be used with `--start-date`/`--end-date`.
+*   `--archive`: Fetch data from the historical archive API instead of the forecast API. Requires specifying `--past-days` or `--start-date`/`--end-date`.
 *   `--favorite <name>`: Use a pre-saved favorite location by its name. Overrides `--latitude`, `--longitude`, and `--location`.
 *   `--chart`: Display a daily temperature chart (ASCII art) if daily `temperature_2m_max` and `temperature_2m_min` data is available.
+*   `--timeformat <format>`: Set the time format for the API response (`iso8601` or `unixtime`).
+*   `--start-date <YYYY-MM-DD>`: Start date for historical data in YYYY-MM-DD format. Requires `--archive`. Cannot be used with `--forecast-days` or `--past-days`.
+*   `--end-date <YYYY-MM-DD>`: End date for historical data in YYYY-MM-DD format. Requires `--archive`. Cannot be used with `--forecast-days` or `--past-days`.
+*   `--models <model>`: Specify weather models to use. Can be used multiple times (e.g., `--models ecmwf_ifs --models gfs_seamless`). See Open-Meteo API documentation for full list of available models.
+*   `--cell-selection <method>`: Method for selecting the geographical grid cell (`land`, `sea`, or `nearest`).
+*   `--elevation <float>`: Elevation above sea level in meters. Defaults to the elevation of the location.
+*   `--disable-stream`: Disable data streaming for faster response times. Only applicable to some API endpoints.
 
 **Examples:**
 
@@ -120,6 +127,11 @@ atmos forecast --favorite "My Home" --current
 *   **Displaying a daily temperature chart:**
     ```bash
 atmos forecast --location "London" --daily temperature_2m_max --daily temperature_2m_min --chart
+    ```
+
+*   **Historical data for a specific date range with a specific model:**
+    ```bash
+atmos forecast --location "Berlin" --start-date 2023-01-01 --end-date 2023-01-07 --daily temperature_2m_max --archive --models ecmwf_ifs
     ```
 
 ### Configuration Management (`atmos config`)
