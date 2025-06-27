@@ -194,7 +194,7 @@ atmos interactive
 
 Example usage within interactive mode:
 
-```
+```bash
 atmos> forecast --location "Paris" --current
 atmos> config list-favorites
 atmos> forecast --favorite "My Home" --daily temperature_2m_max
@@ -227,8 +227,19 @@ atmos-cli/
 │   └── constants.py        # Stores API URLs, default values, and variable lists
 ├── pyproject.toml          # Project metadata and build configuration
 ├── README.md               # Project documentation
-└── requirements.txt        # Python dependencies
+├── requirements.txt        # Python dependencies
+└── tests/                  # Unit and integration tests
 ```
+
+### Testing
+
+To run the test suite and generate a coverage report, first ensure you have `pytest` and `pytest-cov` installed (they are included in `requirements.txt`). Then, navigate to the project root directory and execute:
+
+```bash
+./venv/bin/pytest --cov=atmos_cli --cov-report=term-missing
+```
+
+This command will run all tests, display a summary of passed/failed tests, and show a coverage report indicating which lines of code are covered by tests and which are missing.
 
 ### Open-Meteo API Details
 
