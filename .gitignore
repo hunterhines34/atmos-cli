@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+*.egg-info/
+.tox/
+.pytest_cache/
+.mypy_cache/
+.ipynb_checkpoints/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS generated files
+.DS_Store
+.Trashes
+Thumbs.db
+
+# Atmos CLI specific files
+.atmos_cli_config.json
+.atmos_cli_history

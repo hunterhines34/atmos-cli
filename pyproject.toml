@@ -1,0 +1,22 @@
+[project]
+name = "atmos-cli"
+version = "0.1.0"
+description = "A command-line weather application using Open-Meteo API"
+authors = [
+    { name = "Hunter", email = "hunter@example.com" }
+]
+dependencies = [
+    "click",
+    "requests",
+    "rich",
+]
+requires-python = ">=3.8"
+readme = "README.md"
+license = { text = "MIT" }
+
+[project.scripts]
+atmos = "atmos_cli.main:cli"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
