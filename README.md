@@ -111,27 +111,27 @@ If it's your first run and no default location is set, the application will prom
 
 *   **Hourly temperature and wind speed for the next 3 days:**
     ```bash
-atmos forecast --location "Los Angeles" --hourly temperature_2m --hourly wind_speed_10m --forecast-days 3
+    atmos forecast --location "Los Angeles" --hourly temperature_2m --hourly wind_speed_10m --forecast-days 3
     ```
 
 *   **Daily max/min temperature and precipitation sum for the past 7 days (archive data):**
     ```bash
-atmos forecast --location "Berlin" --daily temperature_2m_max --daily temperature_2m_min --daily precipitation_sum --past-days 7 --archive
+    atmos forecast --location "Berlin" --daily temperature_2m_max --daily temperature_2m_min --daily precipitation_sum --past-days 7 --archive
     ```
 
 *   **Using a favorite location:**
     ```bash
-atmos forecast --favorite "My Home" --current
+    atmos forecast --favorite "My Home" --current
     ```
 
 *   **Displaying a daily temperature chart:**
     ```bash
-atmos forecast --location "London" --daily temperature_2m_max --daily temperature_2m_min --chart
+    atmos forecast --location "London" --daily temperature_2m_max --daily temperature_2m_min --chart
     ```
 
 *   **Historical data for a specific date range with a specific model:**
     ```bash
-atmos forecast --location "Berlin" --start-date 2023-01-01 --end-date 2023-01-07 --daily temperature_2m_max --archive --models ecmwf_ifs
+    atmos forecast --location "Berlin" --start-date 2023-01-01 --end-date 2023-01-07 --daily temperature_2m_max --archive --models ecmwf_ifs
     ```
 
 ### Configuration Management (`atmos config`)
