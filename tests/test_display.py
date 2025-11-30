@@ -101,7 +101,9 @@ def test_display_hourly_weather_success(capsys):
     assert "Temp °F" in output
     assert "55.0" in output
     assert "Overcast" in output
-    assert "Rain: Slight" in output
+    # Check for parts of the string because rich table might wrap text
+    assert "Rain:" in output
+    assert "Slight" in output
 
 def test_display_hourly_weather_error(capsys):
     display_hourly_weather({"error": "API failed"})
@@ -120,10 +122,13 @@ def test_display_daily_weather_success(capsys):
     captured = capsys.readouterr()
     output = captured.out
     assert "Daily Weather in Europe/Berlin" in output
-    assert "Max Temp °F" in output
+    assert "Max Temp" in output
+    assert "°F" in output
     assert "60.0" in output
     assert "Overcast" in output
-    assert "Rain: Moderate" in output
+    # Check for parts of the string because rich table might wrap text
+    assert "Rain:" in output
+    assert "Moderate" in output
 
 def test_display_daily_weather_error(capsys):
     display_daily_weather({"error": "API failed"})

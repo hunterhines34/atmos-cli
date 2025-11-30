@@ -4,12 +4,21 @@ from atmos_cli.constants import OPEN_METEO_BASE_URL, ARCHIVE_BASE_URL, GEOCODING
 def get_weather_data(params: dict, archive: bool = False) -> dict:
     """Fetches weather data from the Open-Meteo API.
 
+    This function constructs a request to the Open-Meteo forecast or archive API
+    based on the provided parameters. It handles HTTP errors and other exceptions,
+    returning a dictionary with an error message if something goes wrong.
+
     Args:
-        params (dict): Dictionary of query parameters for the API request.
-        archive (bool): If True, fetches from the archive API. Defaults to False.
+        params (dict): A dictionary of query parameters for the API request.
+            Common keys include 'latitude', 'longitude', 'hourly', 'daily',
+            'current_weather', 'temperature_unit', 'wind_speed_unit', etc.
+        archive (bool): If True, fetches data from the archive API endpoint.
+            If False, fetches data from the forecast API endpoint. Defaults to False.
 
     Returns:
-        dict: JSON response from the API.
+        dict: The JSON response from the API containing weather data.
+            If an error occurs, returns a dictionary with an "error" key
+            containing the error message.
     """
     base_url = ARCHIVE_BASE_URL if archive else OPEN_METEO_BASE_URL
     try:
@@ -32,12 +41,21 @@ def get_weather_data(params: dict, archive: bool = False) -> dict:
 def get_location_coordinates(location_name: str) -> dict:
     """Fetches latitude and longitude for a given location name using the Open-Meteo Geocoding API.
 
+    This function queries the Open-Meteo Geocoding API to find the coordinates
+    for a specified location name. It returns the first result found.
+
     Args:
-        location_name (str): The name of the city, state, or country.
+        location_name (str): The name of the city, state, or country to search for.
 
     Returns:
-        dict: A dictionary containing 'latitude', 'longitude', and 'name' if successful, 
-              otherwise an error dictionary.
+        dict: A dictionary containing the location details if successful.
+            The dictionary includes:
+            - 'latitude' (float): The latitude of the location.
+            - 'longitude' (float): The longitude of the location.
+            - 'name' (str): The name of the location returned by the API.
+
+            If the location is not found or an error occurs, returns a dictionary
+            with an "error" key containing the error message.
     """
     params = {"name": location_name, "count": 1, "language": "en", "format": "json"}
     try:

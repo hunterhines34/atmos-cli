@@ -16,11 +16,28 @@ def format_time(time_val):
     return str(time_val)
 
 def get_weather_description(code: int) -> str:
-    """Returns a human-readable description for a WMO weather code."""
+    """Returns a human-readable description for a WMO weather code.
+
+    Args:
+        code (int): The WMO weather code returned by the API.
+
+    Returns:
+        str: A descriptive string corresponding to the weather code.
+             Returns "Unknown code: {code}" if the code is not found.
+    """
     return WEATHER_CODES.get(code, f"Unknown code: {code}")
 
 def display_current_weather(data: dict, unit_system: str = "imperial"):
     """Displays current weather data using rich.
+
+    Formatted as a table with relevant weather metrics.
+
+    Args:
+        data (dict): The weather data dictionary returned by the API.
+            Expected to contain 'current', 'current_units', and 'timezone'.
+        unit_system (str): The unit system to use for display ('imperial' or 'metric').
+            Currently used for internal logic if needed, though units are largely derived from API response.
+            Defaults to "imperial".
     """
     if "error" in data:
         console.print(Panel(f"[bold red]Error:[/bold red] {data['error']}", title="[bold red]Weather Data Error[/bold red]"))
@@ -63,6 +80,14 @@ def display_current_weather(data: dict, unit_system: str = "imperial"):
 
 def display_hourly_weather(data: dict, unit_system: str = "imperial"):
     """Displays hourly weather data using rich.
+
+    Formatted as a table with time as the first column and selected metrics as subsequent columns.
+
+    Args:
+        data (dict): The weather data dictionary returned by the API.
+            Expected to contain 'hourly', 'hourly_units', and 'timezone'.
+        unit_system (str): The unit system to use for display ('imperial' or 'metric').
+            Defaults to "imperial".
     """
     if "error" in data:
         console.print(Panel(f"[bold red]Error:[/bold red] {data['error']}", title="[bold red]Weather Data Error[/bold red]"))
@@ -97,6 +122,7 @@ def display_hourly_weather(data: dict, unit_system: str = "imperial"):
             table.add_column(f"{info['name']} {unit}".strip(), style=info["style"])
 
     for i, time_val in enumerate(hourly["time"]):
+        formatted_time = format_time(time_val)
         # If it was an ISO string, extract time part. If it was unix, use full formatted time or extract time?
         # Standard ISO from API is YYYY-MM-DDTHH:MM. split('T')[1] gives HH:MM.
         # format_time gives 'YYYY-MM-DD HH:MM'.
@@ -123,6 +149,14 @@ def display_hourly_weather(data: dict, unit_system: str = "imperial"):
 
 def display_daily_weather(data: dict, unit_system: str = "imperial"):
     """Displays daily weather data using rich.
+
+    Formatted as a table with date as the first column and selected metrics as subsequent columns.
+
+    Args:
+        data (dict): The weather data dictionary returned by the API.
+            Expected to contain 'daily', 'daily_units', and 'timezone'.
+        unit_system (str): The unit system to use for display ('imperial' or 'metric').
+            Defaults to "imperial".
     """
     if "error" in data:
         console.print(Panel(f"[bold red]Error:[/bold red] {data['error']}", title="[bold red]Weather Data Error[/bold red]"))
@@ -177,6 +211,15 @@ def display_daily_weather(data: dict, unit_system: str = "imperial"):
 
 def display_daily_temperature_chart(data: dict, unit_system: str = "imperial"):
     """Displays a daily temperature chart using ASCII art with rich.
+
+    Visualizes the temperature range (min to max) for each day.
+
+    Args:
+        data (dict): The weather data dictionary returned by the API.
+            Expected to contain 'daily', 'daily_units', and 'timezone'.
+            Requires 'temperature_2m_max' and 'temperature_2m_min' in 'daily'.
+        unit_system (str): The unit system to use for display ('imperial' or 'metric').
+            Defaults to "imperial".
     """
     daily = data.get("daily", {})
     daily_units = data.get("daily_units", {})
@@ -243,10 +286,16 @@ def display_daily_temperature_chart(data: dict, unit_system: str = "imperial"):
 
 def display_error(message: str):
     """Displays an error message using rich.
+
+    Args:
+        message (str): The error message to display.
     """
     console.print(Panel(f"[bold red]Error:[/bold red] {message}", title="[bold red]Application Error[/bold red]"))
 
 def display_message(message: str):
     """Displays a general message using rich.
+
+    Args:
+        message (str): The message to display.
     """
     console.print(Panel(f"[bold green]Info:[/bold green] {message}", title="[bold green]Information[/bold green]"))
