@@ -352,7 +352,7 @@ def set_default_location_cmd(location_input):
             display_error(coords["error"])
             return
         set_default_location(coords["name"], coords["latitude"], coords["longitude"])
-        display_message(f"Default location set to: {coords["name"]} ({coords["latitude"]}, {coords["longitude"]}). This preference has been saved.")
+        display_message(f"Default location set to: {coords['name']} ({coords['latitude']}, {coords['longitude']}). This preference has been saved.")
 
 @cli.command(help="Display information about the Atmos CLI application.")
 def about():
