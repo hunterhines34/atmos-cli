@@ -35,8 +35,8 @@ def mock_config_file(tmp_path):
 @pytest.fixture
 def mock_api_calls():
     with (
-        patch('atmos_cli.api.get_weather_data') as mock_get_weather_data,
-        patch('atmos_cli.api.get_location_coordinates') as mock_get_location_coordinates
+        patch('atmos_cli.main.get_weather_data') as mock_get_weather_data,
+        patch('atmos_cli.main.get_location_coordinates') as mock_get_location_coordinates
     ):
         yield mock_get_weather_data, mock_get_location_coordinates
 
@@ -44,12 +44,12 @@ def mock_api_calls():
 @pytest.fixture
 def mock_display_functions():
     with (
-        patch('atmos_cli.display.display_current_weather') as mock_current,
-        patch('atmos_cli.display.display_hourly_weather') as mock_hourly,
-        patch('atmos_cli.display.display_daily_weather') as mock_daily,
-        patch('atmos_cli.display.display_daily_temperature_chart') as mock_chart,
-        patch('atmos_cli.display.display_error') as mock_error,
-        patch('atmos_cli.display.display_message') as mock_message
+        patch('atmos_cli.main.display_current_weather') as mock_current,
+        patch('atmos_cli.main.display_hourly_weather') as mock_hourly,
+        patch('atmos_cli.main.display_daily_weather') as mock_daily,
+        patch('atmos_cli.main.display_daily_temperature_chart') as mock_chart,
+        patch('atmos_cli.main.display_error') as mock_error,
+        patch('atmos_cli.main.display_message') as mock_message
     ):
         yield mock_current, mock_hourly, mock_daily, mock_chart, mock_error, mock_message
 
@@ -124,9 +124,10 @@ def test_forecast_daily_with_chart(runner, mock_api_calls, mock_display_function
     mock_get_weather_data.assert_called_once()
 
 def test_forecast_archive_with_dates(runner, mock_api_calls, mock_display_functions):
-    mock_get_weather_data, _ = mock_api_calls
+    mock_get_weather_data, mock_get_location_coordinates = mock_api_calls
     _, _, mock_daily, _, _, _ = mock_display_functions
 
+    mock_get_location_coordinates.return_value = {"latitude": 52.52, "longitude": 13.41, "name": "Berlin"}
     mock_get_weather_data.return_value = {"daily": {"temperature_2m_max": [5]}, "timezone": "Europe/Berlin"}
 
     result = runner.invoke(cli, ["forecast", "--location", "Berlin", "--start-date", "2023-01-01", "--end-date", "2023-01-07", "--daily", "temperature_2m_max", "--archive"])
@@ -135,7 +136,8 @@ def test_forecast_archive_with_dates(runner, mock_api_calls, mock_display_functi
     mock_daily.assert_called_once()
     mock_get_weather_data.assert_called_once()
     # Verify archive=True was passed to get_weather_data
-    assert mock_get_weather_data.call_args[1]['archive'] is True
+    # It is passed as a positional argument (2nd arg)
+    assert mock_get_weather_data.call_args[0][1] is True
 
 def test_forecast_invalid_lat_lon_input(runner, mock_display_functions):
     _, _, _, _, mock_error, _ = mock_display_functions
@@ -144,9 +146,10 @@ def test_forecast_invalid_lat_lon_input(runner, mock_display_functions):
     mock_error.assert_called_once_with("Invalid latitude or longitude. Latitude must be between -90 and 90, Longitude between -180 and 180.")
 
 def test_forecast_api_error(runner, mock_api_calls, mock_display_functions):
-    mock_get_weather_data, _ = mock_api_calls
+    mock_get_weather_data, mock_get_location_coordinates = mock_api_calls
     _, _, _, _, mock_error, _ = mock_display_functions
 
+    mock_get_location_coordinates.return_value = {"latitude": 52.52, "longitude": 13.41, "name": "Test"}
     mock_get_weather_data.return_value = {"error": "API is down"}
 
     result = runner.invoke(cli, ["forecast", "--location", "Test", "--current"])
@@ -187,9 +190,23 @@ def test_config_list_favorites(runner, mock_display_functions, mock_config_file)
         mock_console_print_main.assert_called_once()
         output_table = mock_console_print_main.call_args[0][0]
         assert isinstance(output_table, Table)
-        assert "Work" in str(output_table)
-        assert "30.0" in str(output_table)
-        assert "40.0" in str(output_table)
+
+        # Check if data is in the table columns
+        found_work = False
+        found_lat = False
+        found_lon = False
+
+        # Accessing private attribute _columns to check content is brittle but effective for simple test
+        # Alternatively, checking columns
+        for col in output_table.columns:
+            for cell in col._cells:
+                if "Work" in str(cell): found_work = True
+                if "30.0" in str(cell): found_lat = True
+                if "40.0" in str(cell): found_lon = True
+
+        assert found_work
+        assert found_lat
+        assert found_lon
 
 def test_config_remove_favorite(runner, mock_display_functions, mock_config_file):
     _, _, _, _, _, mock_message = mock_display_functions

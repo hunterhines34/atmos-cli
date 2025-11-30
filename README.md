@@ -2,6 +2,15 @@
 
 Atmos CLI is a powerful and intuitive command-line interface for fetching weather forecasts and historical data using the Open-Meteo API. Built with Python and the `rich` library, it provides a visually appealing and user-friendly experience with rich text, tables, and interactive features.
 
+## Purpose
+
+The purpose of Atmos CLI is to provide developers and power users with a quick, flexible, and aesthetically pleasing way to access detailed weather information directly from their terminal. It aims to bridge the gap between simple weather tools and complex API interactions by offering a robust CLI that supports:
+
+*   **Real-time and Historical Data:** Access current conditions, forecasts, and historical weather data.
+*   **Automation:** Easy to integrate into scripts and workflows.
+*   **Customization:** Tailor units, locations, and output formats to your needs.
+*   **Usability:** Clear visual output and an interactive mode for exploring data.
+
 ## Features
 
 *   **Comprehensive Weather Data:** Access a wide range of weather variables including temperature, precipitation, wind speed, cloud cover, and more, for current, hourly, and daily forecasts.
@@ -253,6 +262,12 @@ All relevant API parameters are exposed as command-line options in the `forecast
 ## Contributing
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
+
+1.  Fork the repository.
+2.  Create a feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
 ## License
 
