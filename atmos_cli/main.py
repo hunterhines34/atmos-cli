@@ -212,9 +212,11 @@ def forecast(
         "longitude": target_longitude,
     }
 
-    # Only add timezone if explicitly provided by the user
+    # Only add timezone if explicitly provided by the user, otherwise default to auto
     if timezone:
         params["timezone"] = timezone
+    else:
+        params["timezone"] = "auto"
 
     # Handle date parameters: start_date/end_date take precedence over forecast_days/past_days
     if start_date and end_date:
