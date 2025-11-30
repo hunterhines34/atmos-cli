@@ -251,5 +251,6 @@ def test_about_command(runner, mock_display_functions):
         mock_console_print.assert_called_once()
         output_panel = mock_console_print.call_args[0][0]
         assert isinstance(output_panel, Panel)
-        assert "Atmos CLI" in str(output_panel)
-        assert "Version: 0.1.0" in str(output_panel)
+        # Check the renderable content of the Panel
+        assert "Atmos CLI" in str(output_panel.renderable)
+        assert "Version: 0.1.0" in str(output_panel.renderable)

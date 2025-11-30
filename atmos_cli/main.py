@@ -159,9 +159,11 @@ def forecast(
         "longitude": target_longitude,
     }
 
-    # Only add timezone if explicitly provided by the user
+    # Only add timezone if explicitly provided by the user, otherwise default to auto
     if timezone:
         params["timezone"] = timezone
+    else:
+        params["timezone"] = "auto"
 
     # Handle date parameters: start_date/end_date take precedence over forecast_days/past_days
     if start_date and end_date:
@@ -352,7 +354,7 @@ def set_default_location_cmd(location_input):
             display_error(coords["error"])
             return
         set_default_location(coords["name"], coords["latitude"], coords["longitude"])
-        display_message(f"Default location set to: {coords["name"]} ({coords["latitude"]}, {coords["longitude"]}). This preference has been saved.")
+        display_message(f"Default location set to: {coords['name']} ({coords['latitude']}, {coords['longitude']}). This preference has been saved.")
 
 @cli.command(help="Display information about the Atmos CLI application.")
 def about():

@@ -3,9 +3,17 @@ from rich.table import Table
 from rich.panel import Panel
 from rich.text import Text
 from rich import box
+import datetime
 from atmos_cli.constants import WEATHER_CODES
 
 console = Console()
+
+def format_time(time_val):
+    """Formats time value, handling both ISO8601 strings and Unix timestamps."""
+    if isinstance(time_val, (int, float)):
+        # Convert Unix timestamp to readable string
+        return datetime.datetime.fromtimestamp(time_val).strftime('%Y-%m-%d %H:%M')
+    return str(time_val)
 
 def get_weather_description(code: int) -> str:
     """Returns a human-readable description for a WMO weather code."""
@@ -37,7 +45,7 @@ def display_current_weather(data: dict, unit_system: str = "imperial"):
     weather_code = current.get("weather_code")
     weather_description = get_weather_description(weather_code) if weather_code is not None else "N/A"
 
-    table.add_row("Time", Text(current.get("time", "N/A")))
+    table.add_row("Time", Text(format_time(current.get("time", "N/A"))))
     table.add_row("Temperature", f"{current.get('temperature_2m', 'N/A')} {temp_unit}")
     table.add_row("Apparent Temperature", f"{current.get('apparent_temperature', 'N/A')} {temp_unit}")
     table.add_row("Is Day", "Yes" if current.get("is_day") == 1 else "No")
@@ -89,7 +97,18 @@ def display_hourly_weather(data: dict, unit_system: str = "imperial"):
             table.add_column(f"{info['name']} {unit}".strip(), style=info["style"])
 
     for i, time_val in enumerate(hourly["time"]):
-        row_values = [Text(time_val.split('T')[1])]
+        # If it was an ISO string, extract time part. If it was unix, use full formatted time or extract time?
+        # Standard ISO from API is YYYY-MM-DDTHH:MM. split('T')[1] gives HH:MM.
+        # format_time gives 'YYYY-MM-DD HH:MM'.
+        # Let's try to keep it consistent.
+        if "T" in str(time_val):
+             display_time = str(time_val).split('T')[1]
+        elif isinstance(time_val, (int, float)):
+             display_time = datetime.datetime.fromtimestamp(time_val).strftime('%H:%M')
+        else:
+             display_time = str(time_val)
+
+        row_values = [Text(display_time)]
         for api_key in columns_to_display:
             value = hourly[api_key][i]
             if api_key == "weather_code":
@@ -138,7 +157,14 @@ def display_daily_weather(data: dict, unit_system: str = "imperial"):
             table.add_column(f"{info['name']} {unit}".strip(), style=info["style"])
 
     for i, time_val in enumerate(daily["time"]):
-        row_values = [Text(time_val)]
+        # Daily time is usually YYYY-MM-DD.
+        # Unix timestamp for daily is usually midnight.
+        if isinstance(time_val, (int, float)):
+             display_time = datetime.datetime.fromtimestamp(time_val).strftime('%Y-%m-%d')
+        else:
+             display_time = str(time_val)
+
+        row_values = [Text(display_time)]
         for api_key in columns_to_display:
             value = daily[api_key][i]
             if api_key == "weather_code":
