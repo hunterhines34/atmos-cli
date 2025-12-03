@@ -272,8 +272,14 @@ def display_daily_temperature_chart(data: dict, unit_system: str = "imperial"):
         # Add max temp part (red)
         bar.append("█", style="red") # Represent max temp with a single red block
 
+        # Format day if it's a unix timestamp
+        if isinstance(day, (int, float)):
+            display_day = datetime.datetime.fromtimestamp(day).strftime('%Y-%m-%d')
+        else:
+            display_day = str(day)
+
         # Format the line: Date | Min Temp - Max Temp | [Chart Bar]
-        line = Text.from_markup(f"[cyan]{day}[/cyan] | [blue]{min_t:.1f}[/blue] - [red]{max_t:.1f}[/red] {temp_unit} | ")
+        line = Text.from_markup(f"[cyan]{display_day}[/cyan] | [blue]{min_t:.1f}[/blue] - [red]{max_t:.1f}[/red] {temp_unit} | ")
         line.append(bar)
         chart_lines.append(line)
 
