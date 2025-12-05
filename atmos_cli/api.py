@@ -26,16 +26,12 @@ def get_weather_data(params: dict, archive: bool = False) -> dict:
         response.raise_for_status()  # Raise an HTTPError for bad responses (4xx or 5xx)
         return response.json()
     except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
         return {"error": str(http_err)}
     except requests.exceptions.ConnectionError as conn_err:
-        print(f"Connection error occurred: {conn_err}")
         return {"error": str(conn_err)}
     except requests.exceptions.Timeout as timeout_err:
-        print(f"Timeout error occurred: {timeout_err}")
         return {"error": str(timeout_err)}
     except requests.exceptions.RequestException as req_err:
-        print(f"An unexpected error occurred: {req_err}")
         return {"error": str(req_err)}
 
 def get_location_coordinates(location_name: str) -> dict:

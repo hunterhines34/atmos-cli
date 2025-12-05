@@ -83,8 +83,8 @@ def cli():
 @click.option('--wind-speed-unit', type=click.Choice(WIND_SPEED_UNITS), help='Override the default wind speed unit for this forecast (kmh, ms, mph, or kn).')
 @click.option('--precipitation-unit', type=click.Choice(PRECIPITATION_UNITS), help='Override the default precipitation unit for this forecast (mm or inch).')
 @click.option('--timezone', type=str, help='Specify the timezone for the forecast (e.g., America/New_York). If not specified, the timezone is selected automatically for the given latitude and longitude.')
-@click.option('--forecast-days', type=int, default=DEFAULT_FORECAST_DAYS, help='Number of days to forecast (1-16). Defaults to 7 days. Cannot be used with --start-date/--end-date.')
-@click.option('--past-days', type=int, default=DEFAULT_PAST_DAYS, help='Number of past days to include for historical data (0-92). Defaults to 0. Cannot be used with --start-date/--end-date.')
+@click.option('--forecast-days', type=click.IntRange(1, 16), default=DEFAULT_FORECAST_DAYS, help='Number of days to forecast (1-16). Defaults to 7 days. Cannot be used with --start-date/--end-date.')
+@click.option('--past-days', type=click.IntRange(0, 92), default=DEFAULT_PAST_DAYS, help='Number of past days to include for historical data (0-92). Defaults to 0. Cannot be used with --start-date/--end-date.')
 @click.option('--archive', is_flag=True, help='Fetch data from the historical archive API instead of the forecast API. Requires specifying --past-days or --start-date/--end-date.')
 @click.option('--favorite', type=str, help='Use a pre-saved favorite location by its name. Overrides --latitude, --longitude, and --location.')
 @click.option('--chart', is_flag=True, help='Display a daily temperature chart (ASCII art) if daily temperature_2m_max and temperature_2m_min data is available.')
@@ -148,12 +148,12 @@ def forecast(
             display_message(f"Using favorite location: {favorite} ({target_latitude}, {target_longitude})")
         else:
             display_error(f"Favorite location '{favorite}' not found.")
-            return
+            sys.exit(1)
     elif location:
         coords = get_location_coordinates(location)
         if "error" in coords:
             display_error(coords["error"])
-            return
+            sys.exit(1)
         target_latitude = coords["latitude"]
         target_longitude = coords["longitude"]
         location_name = coords["name"]
@@ -176,7 +176,7 @@ def forecast(
                         lat, lon = float(lat_str.strip()), float(lon_str.strip())
                         if not validate_latitude(lat) or not validate_longitude(lon):
                             display_error("Invalid latitude or longitude. Latitude must be between -90 and 90, Longitude between -180 and 180.")
-                            return
+                            sys.exit(1)
                         set_default_location(loc_input, lat, lon)
                         target_latitude = lat
                         target_longitude = lon
@@ -184,12 +184,12 @@ def forecast(
                         display_message(f"Default location set to: {loc_input} ({lat}, {lon}). This preference has been saved.")
                     except ValueError:
                         display_error("Invalid latitude,longitude format. Please use: LATITUDE,LONGITUDE")
-                        return
+                        sys.exit(1)
                 else:
                     coords = get_location_coordinates(loc_input)
                     if "error" in coords:
                         display_error(coords["error"])
-                        return
+                        sys.exit(1)
                     set_default_location(coords["name"], coords["latitude"], coords["longitude"])
                     target_latitude = coords["latitude"]
                     target_longitude = coords["longitude"]
@@ -197,15 +197,15 @@ def forecast(
                     display_message(f"Default location set to: {location_name} ({target_latitude}, {target_longitude}). This preference has been saved.")
             else:
                 display_error("Please specify a location using --latitude/--longitude, --location, or --favorite.")
-                return
+                sys.exit(1)
 
     if target_latitude is None or target_longitude is None:
         display_error("No valid location could be determined. Please provide one.")
-        return
+        sys.exit(1)
 
     if not validate_latitude(target_latitude) or not validate_longitude(target_longitude):
         display_error("Invalid latitude or longitude. Latitude must be between -90 and 90, Longitude between -180 and 180.")
-        return
+        sys.exit(1)
 
     params = {
         "latitude": target_latitude,
@@ -222,11 +222,14 @@ def forecast(
     if start_date and end_date:
         if forecast_days != DEFAULT_FORECAST_DAYS or past_days != DEFAULT_PAST_DAYS:
             display_error("Cannot use --start-date/--end-date with --forecast-days or --past-days. Please choose one method for date range specification.")
-            return
+            sys.exit(1)
         params["start_date"] = start_date
         params["end_date"] = end_date
         # If start_date/end_date are used, --archive is implicitly true
         archive = True
+    elif start_date or end_date:
+        display_error("Both --start-date and --end-date must be provided.")
+        sys.exit(1)
     else:
         params["forecast_days"] = forecast_days
         params["past_days"] = past_days
@@ -260,7 +263,7 @@ def forecast(
 
     if "error" in data:
         display_error(data["error"])
-        return
+        sys.exit(1)
 
     unit_system = "imperial" if params["temperature_unit"] == "fahrenheit" else "metric"
 
