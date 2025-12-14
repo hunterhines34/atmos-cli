@@ -95,8 +95,9 @@ def cli():
 @click.option('--cell-selection', type=click.Choice(CELL_SELECTION_OPTIONS), help='Method for selecting the geographical grid cell (land, sea, or nearest).')
 @click.option('--elevation', type=float, help='Elevation above sea level in meters. Defaults to the elevation of the location.')
 @click.option('--disable-stream', is_flag=True, help='Disable data streaming for faster response times. Only applicable to some API endpoints.')
+@click.pass_context
 def forecast(
-    latitude, longitude, location, current, hourly, daily, temperature_unit, wind_speed_unit,
+    ctx, latitude, longitude, location, current, hourly, daily, temperature_unit, wind_speed_unit,
     precipitation_unit, timezone, forecast_days, past_days, archive, favorite, chart,
     timeformat, start_date, end_date, models, cell_selection, elevation, disable_stream
 ):
@@ -206,6 +207,13 @@ def forecast(
     if not validate_latitude(target_latitude) or not validate_longitude(target_longitude):
         display_error("Invalid latitude or longitude. Latitude must be between -90 and 90, Longitude between -180 and 180.")
         return
+
+    # Validate forecast_days and past_days ranges (only if not using start_date/end_date)
+    if not (start_date and end_date):
+        if forecast_days < 1 or forecast_days > 16:
+            ctx.fail("Invalid forecast_days value. Must be between 1 and 16.")
+        if past_days < 0 or past_days > 92:
+            ctx.fail("Invalid past_days value. Must be between 0 and 92.")
 
     params = {
         "latitude": target_latitude,
