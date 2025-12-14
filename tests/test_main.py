@@ -142,7 +142,7 @@ def test_forecast_archive_with_dates(runner, mock_api_calls, mock_display_functi
 def test_forecast_invalid_lat_lon_input(runner, mock_display_functions):
     _, _, _, _, mock_error, _ = mock_display_functions
     result = runner.invoke(cli, ["forecast", "--latitude", "91.0", "--longitude", "13.41", "--current"])
-    assert result.exit_code == 0 # Click handles validation, but our custom validation should trigger error display
+    assert result.exit_code == 1 # Custom validation exits with 1
     mock_error.assert_called_once_with("Invalid latitude or longitude. Latitude must be between -90 and 90, Longitude between -180 and 180.")
 
 def test_forecast_api_error(runner, mock_api_calls, mock_display_functions):
@@ -154,7 +154,7 @@ def test_forecast_api_error(runner, mock_api_calls, mock_display_functions):
 
     result = runner.invoke(cli, ["forecast", "--location", "Test", "--current"])
 
-    assert result.exit_code == 0
+    assert result.exit_code == 1
     mock_error.assert_called_once_with("API is down")
 
 # --- Test config commands ---
